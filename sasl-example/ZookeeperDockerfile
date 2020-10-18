@@ -1,0 +1,18 @@
+FROM openjdk:8
+
+RUN apt update
+RUN apt install -y vim
+RUN echo "alias run='/kafka/bin/zookeeper-server-start.sh config/zookeeper.properties'" >> ~/.bashrc
+ENV KAFKA_OPTS="-Djava.security.auth.login.config=/kafka/kafka_zk_jaas.conf"
+
+# Download Kafka
+RUN curl -O https://downloads.apache.org/kafka/2.5.0/kafka_2.12-2.5.0.tgz
+RUN tar -xf kafka_2.12-2.5.0.tgz
+RUN rm kafka_2.12-2.5.0.tgz
+
+RUN mv kafka_2.12-2.5.0 kafka
+WORKDIR /kafka
+ADD kafka_zk_jaas.conf .
+ADD config/zookeeper.properties config/
+
+CMD ["bin/zookeeper-server-start.sh", "config/zookeeper.properties"]

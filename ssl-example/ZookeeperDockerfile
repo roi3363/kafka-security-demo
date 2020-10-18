@@ -1,0 +1,15 @@
+FROM openjdk:8
+
+RUN apt update
+RUN apt install -y vim
+RUN echo "alias start_zookeeper='/kafka_2.12-2.5.0/bin/zookeeper-server-start.sh config/zookeeper.properties'" >> ~/.bashrc
+
+# Download Kafka
+RUN curl -O https://downloads.apache.org/kafka/2.5.0/kafka_2.12-2.5.0.tgz
+RUN tar -xf kafka_2.12-2.5.0.tgz
+RUN rm kafka_2.12-2.5.0.tgz
+
+RUN mv kafka_2.12-2.5.0 kafka
+WORKDIR /kafka
+
+CMD ["bin/zookeeper-server-start.sh", "config/zookeeper.properties"]

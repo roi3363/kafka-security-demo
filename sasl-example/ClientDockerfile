@@ -1,0 +1,23 @@
+FROM openjdk:8
+
+RUN apt update
+RUN apt install -y vim
+RUN echo "alias start_producer='bin/kafka-console-producer.sh --bootstrap-server broker:9093 --topic test --producer.config config/producer.properties'" >> ~/.bashrc
+RUN echo "alias start_consumer='bin/kafka-console-consumer.sh --bootstrap-server broker:9093 --topic test --from-beginning --consumer.config config/producer.properties'" >> ~/.bashrc
+
+RUN mkdir -p ssl
+WORKDIR /ssl
+ADD ca-cert /ssl
+RUN keytool -keystore /ssl/client.truststore.jks -alias ca-root -import -file /ssl/ca-cert -storepass "123456" -keypass "123456" -noprompt
+RUN rm /ssl/ca-cert
+
+# Download Kafka
+WORKDIR /
+RUN curl -O https://downloads.apache.org/kafka/2.5.0/kafka_2.12-2.5.0.tgz
+RUN tar -xf kafka_2.12-2.5.0.tgz
+RUN rm kafka_2.12-2.5.0.tgz
+
+RUN mv kafka_2.12-2.5.0 kafka
+WORKDIR /kafka
+ADD config/consumer.properties config/
+ADD config/producer.properties config/
